@@ -1,77 +1,97 @@
-import {newServer} from "../../src/newServer";
+import { newServer } from "../../src/newServer";
 
-const test = require('ava');
+const test = require("ava");
 
-import {ApolloServer} from "apollo-server";
-import {context} from "../../src/context";
-const server:ApolloServer = newServer(context)
+import { ApolloServer } from "apollo-server";
+import { context } from "../../src/context";
 
-import {CREATE_BOOKS_OUTPUT, CREATE_BOOKS_PARAMS, CREATE_BOOKS_MUTATION} from "../data/createBooks";
-import {BOOKS_PARAMS, BOOKS_QUERY} from "../data/books";
-import {UPDATE_BOOKS_MUTATION, UPDATE_BOOKS_OUTPUT, UPDATE_BOOKS_PARAMS} from "../data/updateBooks";
-import {DELETE_BOOKS_MUTATION, DELETE_BOOKS_PARAMS} from "../data/deleteBooks";
+import {
+  CREATE_BOOKS_OUTPUT,
+  CREATE_BOOKS_PARAMS,
+  CREATE_BOOKS_MUTATION,
+} from "../data/createBooks";
+import { BOOKS_PARAMS, BOOKS_QUERY } from "../data/books";
+import {
+  UPDATE_BOOKS_MUTATION,
+  UPDATE_BOOKS_OUTPUT,
+  UPDATE_BOOKS_PARAMS,
+} from "../data/updateBooks";
+import {
+  DELETE_BOOKS_MUTATION,
+  DELETE_BOOKS_PARAMS,
+} from "../data/deleteBooks";
 
 interface Book {
-    author: string;
-    title: string;
+  author: string;
+  title: string;
 }
 
-test.serial('createBooks', async (t: any) => {
+(async function () {
+  const server: ApolloServer = await newServer(context);
+
+  test.serial("createBooks", async (t: any) => {
     const result = await server.executeOperation({
-        query: CREATE_BOOKS_MUTATION,
-        variables: CREATE_BOOKS_PARAMS,
+      query: CREATE_BOOKS_MUTATION,
+      variables: CREATE_BOOKS_PARAMS,
     });
 
     t.true(result.errors === undefined);
 
     t.deepEqual(
-        // @ts-ignore
-        result.data.createBooks,
-        CREATE_BOOKS_OUTPUT
+      // @ts-ignore
+      result.data.createBooks,
+      CREATE_BOOKS_OUTPUT
     );
-});
+  });
 
-test.serial('updateBooks', async (t: any) => {
+  test.serial("updateBooks", async (t: any) => {
     const result = await server.executeOperation({
-        query: UPDATE_BOOKS_MUTATION,
-        variables: UPDATE_BOOKS_PARAMS,
+      query: UPDATE_BOOKS_MUTATION,
+      variables: UPDATE_BOOKS_PARAMS,
     });
 
     t.true(result.errors === undefined);
 
-    if (!result.data) throw new Error('no results for updateBooks')
+    if (!result.data) throw new Error("no results for updateBooks");
 
     t.deepEqual(
-        // @ts-ignore
-        result.data.updateBooks.books[0],
-        UPDATE_BOOKS_OUTPUT.books[0]
+      // @ts-ignore
+      result.data.updateBooks.books[0],
+      UPDATE_BOOKS_OUTPUT.books[0]
     );
-});
+  });
 
-
-test.serial('deleteBooks', async (t: any) => {
+  test.serial("deleteBooks", async (t: any) => {
     const result = await server.executeOperation({
-        query: DELETE_BOOKS_MUTATION,
-        variables: DELETE_BOOKS_PARAMS,
+      query: DELETE_BOOKS_MUTATION,
+      variables: DELETE_BOOKS_PARAMS,
     });
 
     t.true(result.errors === undefined);
 
-    if (!result.data) throw new Error('no results for deleteBooks')
-    t.true(result.data.deleteBooks.nodesDeleted && result.data.deleteBooks.nodesDeleted > 0);
-});
+    if (!result.data) throw new Error("no results for deleteBooks");
+    t.true(
+      result.data.deleteBooks.nodesDeleted &&
+        result.data.deleteBooks.nodesDeleted > 0
+    );
+  });
 
-test('books', async (t: any) => {
+  test("books", async (t: any) => {
     const result = await server.executeOperation({
-            query: BOOKS_QUERY,
-            variables: BOOKS_PARAMS,
-        });
+      query: BOOKS_QUERY,
+      variables: BOOKS_PARAMS,
+    });
 
     t.true(result.errors === undefined);
 
-    if(!result || !result.data || !result.data.books) throw new Error('no results for books query...')
-    if(!result.data.books.filter) throw new Error('error in list of books returned for books')
-    const portionOfOutput = result.data.books.filter((book:Book)=>book.author='Toni Morrison')
+    if (!result || !result.data || !result.data.books)
+      throw new Error("no results for books query...");
+    if (!result.data.books.filter)
+      throw new Error("error in list of books returned for books");
+    const portionOfOutput = result.data.books.filter(
+      (book: Book) => (book.author = "Toni Morrison")
+    );
 
     t.true(portionOfOutput.length > 0);
-});
+  });
+})();

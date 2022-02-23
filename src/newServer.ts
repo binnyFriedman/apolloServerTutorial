@@ -1,10 +1,10 @@
-import {Neo4jGraphQL} from '@neo4j/graphql';
+import { Neo4jGraphQL } from "@neo4j/graphql";
 
-import {ApolloServer} from "apollo-server";
+import { ApolloServer } from "apollo-server";
 
-require('dotenv').config();
+require("dotenv").config();
 
-const { gql } = require('apollo-server');
+const { gql } = require("apollo-server");
 
 const typeDefs = gql`
   type Book {
@@ -13,14 +13,13 @@ const typeDefs = gql`
   }
 `;
 const schema = new Neo4jGraphQL({
-    typeDefs,
-}).schema;
+  typeDefs,
+}).getSchema();
 
-export function newServer(context: any):ApolloServer {
-    const server: ApolloServer = new ApolloServer(
-        {
-            schema,
-            context,
-        });
-    return server;
+export async function newServer(context: any): Promise<ApolloServer> {
+  const server: ApolloServer = new ApolloServer({
+    schema: await schema,
+    context,
+  });
+  return server;
 }
